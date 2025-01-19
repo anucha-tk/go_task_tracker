@@ -17,8 +17,7 @@ var addCmd = &cobra.Command{
 		}
 
 		description := args[0]
-		task.AddTask(description)
-		return nil
+		return task.AddTask(description)
 	},
 }
 
