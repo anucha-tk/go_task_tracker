@@ -64,8 +64,7 @@ func UpdateTask(id int64, description string) error {
 	tasks, err := ReadTasksFormFile()
 	if err != nil {
 		errMsg := style.ErrorStyle().Render(fmt.Sprintf("Error can't read task from file: %v\n", err))
-		fmt.Print(errMsg)
-		return err
+		return fmt.Errorf(errMsg)
 	}
 
 	taskExist := false
@@ -83,6 +82,31 @@ func UpdateTask(id int64, description string) error {
 	}
 
 	successMsg := style.SuccessStyle().Render(fmt.Sprintf("🔄 Update task successful, id: %d, %s", id, description))
+	fmt.Println(successMsg)
+	return WriteTaskToFile(tasks)
+}
+
+func DeleteTask(id int64) error {
+	tasks, err := ReadTasksFormFile()
+	if err != nil {
+		errMsg := style.ErrorStyle().Render(fmt.Sprintf("Error can't read task from file: %v\n", err))
+		return fmt.Errorf(errMsg)
+	}
+
+	taskExist := false
+	for i, task := range tasks {
+		if task.ID == id {
+			taskExist = true
+			tasks = append(tasks[:i], tasks[i+1:]...)
+		}
+	}
+
+	if !taskExist {
+		errMsg := style.ErrorStyle().Render(fmt.Sprintf("Task id %d not found", id))
+		return fmt.Errorf(errMsg)
+	}
+
+	successMsg := style.SuccessStyle().Render(fmt.Sprintf("🗑️ Delete task id:%d successful", id))
 	fmt.Println(successMsg)
 	return WriteTaskToFile(tasks)
 }
