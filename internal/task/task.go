@@ -115,17 +115,32 @@ func DeleteTask(id int64) error {
 	return WriteTaskToFile(tasks)
 }
 
-func ListTasks() error {
+func ListTasks(status TaskStatus) error {
 	tasks, err := ReadTasksFormFile()
 	if err != nil {
 		errMsg := style.ErrorStyle().Render(fmt.Sprintf("Error can't read task from file: %v\n", err))
 		return fmt.Errorf(errMsg)
 	}
 
-	// convert []Task to [][]string
-	rows := make([][]string, len(tasks))
+	// filter
+	filterTasks := []Task{}
+	for _, task := range tasks {
+		switch status {
+		case "all":
+			filterTasks = tasks
+		case Task_Status_TODO, Task_Status_IN_PROGRESS, Task_Status_DONE:
+			if task.Status == status {
+				filterTasks = append(filterTasks, task)
+			}
+		}
+		if status == "all" {
+			break
+		}
+	}
 
-	for i, task := range tasks {
+	// convert []Task to [][]string
+	rows := make([][]string, len(filterTasks))
+	for i, task := range filterTasks {
 		rows[i] = []string{
 			fmt.Sprintf("%d", task.ID),
 			task.Description,
@@ -134,6 +149,7 @@ func ListTasks() error {
 			task.UpdatedAt.Format("2006-01-02 15:04:05"),
 		}
 	}
+
 	headers := []string{"ID", "Description", "Status", "CreatedAt", "UpdatedAt"}
 	re := lipgloss.NewRenderer(os.Stdout)
 	baseStyle := re.NewStyle().Padding(0, 1)
