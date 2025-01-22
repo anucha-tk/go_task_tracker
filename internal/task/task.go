@@ -2,9 +2,13 @@ package task
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/anucha-tk/task_tracker/style"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 )
 
 type TaskStatus string
@@ -109,4 +113,52 @@ func DeleteTask(id int64) error {
 	successMsg := style.SuccessStyle().Render(fmt.Sprintf("🗑️ Delete task id:%d successful", id))
 	fmt.Println(successMsg)
 	return WriteTaskToFile(tasks)
+}
+
+func ListTasks() error {
+	tasks, err := ReadTasksFormFile()
+	if err != nil {
+		errMsg := style.ErrorStyle().Render(fmt.Sprintf("Error can't read task from file: %v\n", err))
+		return fmt.Errorf(errMsg)
+	}
+
+	// convert []Task to [][]string
+	rows := make([][]string, len(tasks))
+
+	for i, task := range tasks {
+		rows[i] = []string{
+			fmt.Sprintf("%d", task.ID),
+			task.Description,
+			string(task.Status),
+			task.CreatedAt.Format("2006-01-02 15:04:05"),
+			task.UpdatedAt.Format("2006-01-02 15:04:05"),
+		}
+	}
+	headers := []string{"ID", "Description", "Status", "CreatedAt", "UpdatedAt"}
+	re := lipgloss.NewRenderer(os.Stdout)
+	baseStyle := re.NewStyle().Padding(0, 1)
+	headerStyle := baseStyle.Foreground(lipgloss.Color("252")).Bold(true)
+	CapitalizeHeaders := func(data []string) []string {
+		for i := range data {
+			data[i] = strings.ToUpper(data[i])
+		}
+		return data
+	}
+
+	t := table.New().
+		Border(lipgloss.NormalBorder()).
+		BorderStyle(re.NewStyle().Foreground(lipgloss.Color("238"))).
+		Headers(CapitalizeHeaders(headers)...).
+		Width(80).
+		Rows(rows...).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == table.HeaderRow {
+				return headerStyle
+			}
+			return baseStyle.Foreground(lipgloss.Color("252"))
+		})
+
+	fmt.Println(t)
+
+	return nil
 }
