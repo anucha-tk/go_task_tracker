@@ -3,10 +3,17 @@
 <!--toc:start-->
 
 - [GO_TASK_TRACKER](#gotasktracker)
-  - [How to run](#how-to-run) - [Build](#build) - [Run](#run)
-  <!--toc:end-->
+  - [What we learn](#what-we-learn)
+  - [How to run](#how-to-run)
+    - [Build](#build)
+    - [Run](#run)
+    <!--toc:end-->
 
 CRUD CLI task json file.
+
+<p align="center">
+  <img src="doc/task_tracker.gif" alt="animated" />
+</p></p>
 
 ## What we learn
 
@@ -17,8 +24,8 @@ CRUD CLI task json file.
 
 ### Build
 
-```bash make build
-
+```bash
+make build
 ```
 
 ### Run
